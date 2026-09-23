@@ -1,0 +1,29 @@
+<div class="container-fluid"> <!-- Contenedor que ocupa todo el ancho de la pagina-->
+
+  <!-- Logo -->
+  <div class="row align-items-center d-flex"> <!-- En esa columna esta el logo y el menu -->
+    <div class="col-1">
+    <img src="/logo.png" alt="Logo">
+    </div>
+
+    <!-- Menu -->
+    <div class="col-11"> <!-- Para añadirle estilo en el CSS -->
+      <div class="menu-full">
+        <app-menu></app-menu>
+      </div>
+    </div>
+
+  <!-- Contenido dinámico  -->
+  <div class="col-12">
+    <div class="col-12">
+      <router-outlet></router-outlet> <!-- Donde queremos que los componentes dinamicos se muestren, dependiendo la ruta -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="row">
+    <div class="col">
+      <app-footer></app-footer>
+    </div>
+  </div>
+</div>

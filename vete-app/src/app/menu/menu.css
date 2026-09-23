@@ -1,0 +1,14 @@
+.menu-full { /*Color del fondo de la barra de menu*/
+    background-color: #f8b3d6;
+}
+
+/* Estilo de los botones */
+.nav-pills .nav-link { /* Estilo de los botones cuando no estan en el sitio */
+    background-color: #ffe4ef;
+    color: #c2185b;
+}
+
+.nav-pills .nav-link.active { /* Estilo de los botones cuando se esta en el sitio del boton */
+    background-color: #c2185b;
+    color: white;
+}

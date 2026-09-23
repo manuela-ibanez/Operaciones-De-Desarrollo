@@ -1,0 +1,8 @@
+.container-fluid { /*Para el fondo de la pagina */
+    background-color: #fde7f2 !important;
+}
+
+.menu-full {
+    background-color: #f8b3d6; /*fondo del menu*/
+    display: flex; /*para que este a la izquierda*/
+}

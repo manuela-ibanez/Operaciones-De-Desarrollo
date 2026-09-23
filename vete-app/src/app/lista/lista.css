@@ -1,0 +1,39 @@
+/* Estilo del título principal */
+h2 {
+    color: #c2185b;
+    text-align: center;
+}
+
+/* Encabezado de tabla  */
+.table thead th {
+    background-color: #c2185b;
+    color: white;
+    border-color: #c2185b;
+}
+
+/* Botón principal rosa */
+.btn-añadir {
+    background-color: #c2185b;
+    border-color: #c2185b;
+    color: white
+}
+
+/* Botón de editar */
+.btn-editar {
+    background-color: #f48fb1;
+    border-color: #f48fb1;
+    color: white;
+}
+
+
+/* Subtítulos del formulario */
+h5 {
+    color: #c2185b;
+    font-weight: 600;
+}
+
+.card-header{
+    background-color: #c2185b;
+    border-color: #c2185b;
+    color: white
+}
