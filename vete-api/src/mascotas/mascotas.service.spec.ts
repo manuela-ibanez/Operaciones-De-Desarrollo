@@ -17,7 +17,7 @@ describe('MascotasService', () => {
   beforeEach(async () => { //Cuando se pide Repository<Mascota> se da mockMascotasRepository
     const module: TestingModule = await Test.createTestingModule({
       providers: [MascotasService, {provide:getRepositoryToken(Mascota), 
-                                    useValue:mockMascotaRepository},],
+                                    useValue:mockMascotasRepository},],
     }).compile();
 
     service = module.get<MascotasService>(MascotasService);
@@ -36,8 +36,20 @@ describe('MascotasService', () => {
     it('should return all mascotas successfully', async () => {
       //Arrange
       const mockMascotas = [ //Prepara los datos del test, mascotas inventadas para el test
-        {id: 1, nombre: 'Luna'},
-        {id: 2, nombre: 'Toby'},
+        { id: 1,
+          nombre: 'Luna',
+          clase: 'Perro',
+          peso: 12,
+          edad: 4,
+          usuarioId: 1,
+        },
+      { id: 2,
+        nombre: 'Toby',
+        clase: 'Gato',
+        peso: 5,
+        edad: 2,
+        usuarioId: 2,
+      },
         ] as Mascota[];
 
       //Cuando se ejecuta mockMascotasRepository.find() devuelve mockMascotas
@@ -61,20 +73,36 @@ describe('MascotasService', () => {
       // Arrange
       const createMascotaDto = { //
         nombre: 'Luna',
+        clase: 'Perro',
+        peso: 12,
+        edad: 4,
+        usuarioId: 1,
       } as CreateMascotaDto; //Le indica que trate el objeto como un CreateMascotaDto
 
       const mascotaCreada = {
         nombre: 'Luna',
+        clase: 'Perro',
+        peso: 12,
+        edad: 4,
+        usuarioId: 1,
       } as Mascota;
 
       const mascotaGuardada = {
         id: 1,
         nombre: 'Luna',
+        clase: 'Perro',
+        peso: 12,
+        edad: 4,
+        usuarioId: 1,
       } as Mascota;
 
       const mascotaCompleta = {
         id: 1,
         nombre: 'Luna',
+        clase: 'Perro',
+        peso: 12,
+        edad: 4,
+        usuarioId: 1,
       } as Mascota;
 
       mockMascotasRepository.create.mockReturnValue(mascotaCreada); //Usa return value porque no es async
