@@ -1,23 +1,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
-import { Menu } from './menu';
+import { MenuComponent } from './menu';
 
-describe('Menu', () => {
-  let component: Menu;
-  let fixture: ComponentFixture<Menu>;
+describe('MenuComponent', () => {
+
+  let component: MenuComponent;
+  let fixture: ComponentFixture<MenuComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Menu]
-    })
-    .compileComponents();
 
-    fixture = TestBed.createComponent(Menu);
+    await TestBed.configureTestingModule({
+      imports: [MenuComponent],
+
+      providers: [
+        provideRouter([])
+      ]
+
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(MenuComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
 });
