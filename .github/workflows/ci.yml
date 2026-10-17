@@ -1,0 +1,239 @@
+# Nombre que aparece en la pestaña Actions de GitHub
+name: CI/CD VeteApp
+
+
+# Se ejecuta cuando se hace push a main
+# o cuando se hace un Pull Request hacia main
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
+
+  # Permite ejecutar el workflow manualmente desde GitHub
+  workflow_dispatch:
+
+
+# Version de Node que se usa en backend y frontend
+env:
+  NODE_VERSION: '20'
+
+
+jobs:
+
+  # Tests y build del backend
+  backend:
+    name: Backend Tests & Build
+
+    runs-on: ubuntu-latest
+
+
+    # Se crea una base PostgreSQL para los test de integracion
+    services:
+
+      postgres:
+        image: postgres:latest
+
+        env:
+          POSTGRES_USER: vete-admin
+          POSTGRES_PASSWORD: securepassword1234!
+          POSTGRES_DB: vetedb
+
+        ports:
+          - 5432:5432
+
+        # Espera hasta que PostgreSQL este listo
+        options: >-
+          --health-cmd="pg_isready -U vete-admin -d vetedb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+
+    # Todos los comandos run se ejecutan dentro de vete-api
+    defaults:
+      run:
+        working-directory: ./vete-api
+
+
+    # Variables que necesita el backend para conectarse a PostgreSQL
+    env:
+      DATABASE_URL: postgresql://vete-admin:securepassword1234!@localhost:5432/vetedb
+      DB_SYNC: 'true'
+      DB_SSL: 'false'
+
+
+    steps:
+
+      # Descarga el repositorio dentro de la maquina de GitHub
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+
+      # Configura Node
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+          # Guarda dependencias para acelerar futuras ejecuciones
+          cache: 'npm'
+
+          # package-lock correspondiente al backend
+          cache-dependency-path: vete-api/package-lock.json
+
+
+      # Instala las dependencias usando package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+
+
+      # Ejecuta todos los test del backend
+      # Incluye los unit test y el integration test
+      - name: Ejecutar tests
+        run: npm test -- --runInBand
+
+
+      # Comprueba que el backend compile correctamente
+      - name: Build del backend
+        run: npm run build
+
+
+
+  # Tests y build del frontend
+  frontend:
+    name: Frontend Tests & Build
+
+    runs-on: ubuntu-latest
+
+
+    # Todos los comandos run se ejecutan dentro de vete-app
+    defaults:
+      run:
+        working-directory: ./vete-app
+
+
+    steps:
+
+      # Descarga el repositorio
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+
+      # Configura Node
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+          cache: 'npm'
+
+          # package-lock correspondiente al frontend
+          cache-dependency-path: vete-app/package-lock.json
+
+
+      # Instala las dependencias del frontend
+      - name: Instalar dependencias
+        run: npm ci
+
+
+      # Instala Chrome para poder ejecutar los test de Angular
+      - name: Configurar Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+
+
+      # Ejecuta todos los test del frontend
+      # Se usa ChromeHeadless porque GitHub no tiene una ventana grafica
+      - name: Ejecutar tests
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+          CI: true
+
+
+      # Comprueba que el frontend compile correctamente
+      - name: Build del frontend
+        run: npm run build
+
+
+
+  # Construye y sube las imagenes a Docker Hub
+  docker:
+    name: Docker Build & Push
+
+    runs-on: ubuntu-latest
+
+
+    # Este job espera que backend y frontend terminen correctamente
+    needs:
+      - backend
+      - frontend
+
+
+    # Solo se suben imagenes cuando se hace push a main
+    # En los Pull Request solamente se ejecutan los test y builds
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+
+    steps:
+
+      # Descarga el repositorio
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+
+      # Configura Docker Buildx
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      # Inicia sesion en Docker Hub
+      # Los datos se guardan como Secrets de GitHub
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+
+      # Construye y sube la imagen del backend
+      - name: Build y Push Backend
+        uses: docker/build-push-action@v6
+
+        with:
+          context: ./vete-api
+          file: ./vete-api/Dockerfile
+          push: true
+
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/vete-api:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/vete-api:latest
+
+
+      # Construye y sube la imagen del frontend
+      - name: Build y Push Frontend
+        uses: docker/build-push-action@v6
+
+        with:
+          context: ./vete-app
+          file: ./vete-app/Dockerfile
+          push: true
+
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/vete-app:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/vete-app:latest
+
+
+      # Descarga la imagen oficial de PostgreSQL
+      # y la sube al Docker Hub del proyecto
+      - name: Push PostgreSQL
+        run: |
+          docker pull postgres:latest
+          docker tag postgres:latest ${{ secrets.DOCKERHUB_USERNAME }}/vete-postgres:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/vete-postgres:latest
