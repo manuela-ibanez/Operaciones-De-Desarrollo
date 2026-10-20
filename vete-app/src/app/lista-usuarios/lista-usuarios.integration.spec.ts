@@ -44,7 +44,7 @@
 
 
     //Test
-        it('Carg ausuarios', () => {
+        it('Cargs usuarios', () => {
 
         //Arrange
         //Se crean los usuarios simulados que devolveria el backend
