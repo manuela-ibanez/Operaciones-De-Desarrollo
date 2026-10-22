@@ -3,6 +3,9 @@ import { MascotasService } from './mascotas.service';
 import { Mascota } from './entities/mascota.entity'; //Se necesita porque el service usa Repository<Mascota>
 import { CreateMascotaDto } from './dto/create-mascota.dto'; //Se necesita para construir los datos que se le van a enviar al create
 import { getRepositoryToken } from '@nestjs/typeorm'; //Para que nest identifique el respository mediante un token, permite obtener el dentificador para que no se use el respositorio real
+import { beforeEach, describe } from 'node:test';
+import { expect, it, jest } from '@jest/globals';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
 
 describe('MascotasService', () => {
   let service: MascotasService; //Guarda la instancia real de MascotasService
