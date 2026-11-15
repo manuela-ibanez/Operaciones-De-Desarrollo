@@ -237,3 +237,21 @@ jobs:
           docker pull postgres:latest
           docker tag postgres:latest ${{ secrets.DOCKERHUB_USERNAME }}/vete-postgres:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/vete-postgres:latest
+
+  # Despliega imagen en Render
+  deploy:
+    name: Deploy en Render
+
+    runs-on: ubuntu-latest
+
+    # Espera a que DockerHub tenga las imagenes
+    needs: docker
+
+    # Solo despliega cuando hay un push a main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Ejecutar Deploy Hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
