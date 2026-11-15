@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Delete, HttpStatus, HttpException, Put} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpStatus,
+  HttpException,
+  Put,
+} from '@nestjs/common';
 import { MascotasService } from './mascotas.service';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
 import { UpdateMascotaDto } from './dto/update-mascota.dto';
@@ -11,9 +21,12 @@ export class MascotasController {
   async create(@Body() createMascotaDto: CreateMascotaDto) {
     try {
       const mascota = await this.mascotasService.create(createMascotaDto);
-      return mascota;  //Devolver solo la mascota, sin el mensaje
-    } catch (error) {
-      throw new HttpException('Error al crear la mascota', HttpStatus.BAD_REQUEST);
+      return mascota; //Devolver solo la mascota, sin el mensaje
+    } catch {
+      throw new HttpException(
+        'Error al crear la mascota',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -32,18 +45,27 @@ export class MascotasController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateMascotaDto: UpdateMascotaDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateMascotaDto: UpdateMascotaDto,
+  ) {
     try {
       const mascota = await this.mascotasService.findOne(+id);
       if (!mascota) {
         throw new HttpException('Mascota no encontrada', HttpStatus.NOT_FOUND);
       }
-      
-      const updatedMascota = await this.mascotasService.update(+id, updateMascotaDto);
-      return updatedMascota;  //Devolver solo la mascota actualizada, sin el mensaje
+
+      const updatedMascota = await this.mascotasService.update(
+        +id,
+        updateMascotaDto,
+      );
+      return updatedMascota; //Devolver solo la mascota actualizada, sin el mensaje
     } catch (error) {
       console.error('Error al actualizar la mascota:', error);
-      throw new HttpException('Error al actualizar la mascota', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Error al actualizar la mascota',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 

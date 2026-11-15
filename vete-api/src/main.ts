@@ -5,6 +5,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors(); //Para que angular pueda conectarse
-  await app.listen(3000)
+  await app.listen(3000);
 }
-bootstrap();
+void bootstrap();

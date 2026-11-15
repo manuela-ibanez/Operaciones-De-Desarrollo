@@ -1,8 +1,5 @@
 //Funciones de Jest que se usan para definir y ejecutar los test
 //describe agrupa los test
-//beforeAll se ejecuta una vez antes de todos los test
-//afterAll se ejecuta una vez despues de todos los test
-//it define un caso de prueba
 //expect comprueba que el resultado sea el esperado
 import { describe, beforeAll, afterAll, it, expect } from '@jest/globals';
 
@@ -50,6 +47,6 @@ describe('Mascotas Integration Test', () => {
   //Se ejecuta una vez despues de todos los test
   afterAll(async () => {
     //Se cierra el modulo si llego a crearse y se liberan las conexiones
-    await module?.close();
+    await module?.close(); //signo de pregunta significa que lo cierra si existe module
   });
 });
