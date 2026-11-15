@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vete-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vete-api
+  template:
+    metadata:
+      labels:
+        app: vete-api
+    spec:
+      containers:
+        - name: vete-api
+          image: manuelaibanez29/vete-api:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 3000
+
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: vete-api-secret
+                  key: database-url
+            - name: DB_SYNC
+              value: "true"
+            - name: DB_SSL
+              value: "false"
+            - name: PORT
+              value: "3000"
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 3
+            failureThreshold: 20
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
