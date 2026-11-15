@@ -1,14 +1,27 @@
 #Parte de una imagen de Docker que contiene Node.js 20
-FROM node:20
+FROM node:20-alpine AS build
 #Define el directorio de trabajo dentro del contenedor
 WORKDIR /app
 #Copia los archivos package.json y package-lock.json al directorio de trabajo
 COPY package*.json ./
-#Instala las dependencias del proyecto
-RUN npm install
+RUN npm ci
 #Copia todos los archivos del proyecto al directorio de trabajo
 COPY . .
-#Expone el puerto 4200 para que la aplicación sea accesible desde fuera del contenedor
-EXPOSE 4200
+#Instala las dependencias del proyecto
+RUN npm run build
+
+FROM nginx:stable-alpine
+RUN rm -rf /usr/share/nginx/html/*
+
+COPY --from=build /app/dist/*/browser/ /usr/share/nginx/html/
+
+# Compatibilidad con compilaciones Angular que generan index.csr.html
+RUN if [ -f /usr/share/nginx/html/index.csr.html ]; then \
+      cp /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html; \
+    fi
+RUN test -f /usr/share/nginx/html/index.html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+#Expone el puerto 80 para que la aplicación sea accesible desde fuera del contenedor
+EXPOSE 80
 #Define el comando que se ejecutará cuando se inicie el contenedor
-CMD ["npm", "start", "--", "--host", "0.0.0.0"]
+CMD ["nginx", "-g", "daemon off;"]
