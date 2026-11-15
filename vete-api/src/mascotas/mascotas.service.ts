@@ -10,15 +10,15 @@ export class MascotasService {
     @InjectRepository(Mascota)
     private mascotasRepository: Repository<Mascota>,
   ) {}
-  
+
   async create(createMascotaDto: CreateMascotaDto) {
     const mascota = this.mascotasRepository.create(createMascotaDto);
     const mascotaGuardada = await this.mascotasRepository.save(mascota);
-    
+
     // Recargar con la relación de usuario
     return this.mascotasRepository.findOne({
       where: { id: mascotaGuardada.id },
-      relations: ['usuario']
+      relations: ['usuario'],
     });
   }
 
@@ -29,15 +29,18 @@ export class MascotasService {
   findOne(id: number): Promise<Mascota | null> {
     return this.mascotasRepository.findOne({
       where: { id },
-      relations: ['usuario']
+      relations: ['usuario'],
     });
   }
-  
-  async update(id: number, updateMascotaDto: Partial<Mascota>): Promise<Mascota> {
+
+  async update(
+    id: number,
+    updateMascotaDto: Partial<Mascota>,
+  ): Promise<Mascota> {
     await this.mascotasRepository.update(id, updateMascotaDto);
     const updatedMascota = await this.mascotasRepository.findOne({
       where: { id },
-      relations: ['usuario']
+      relations: ['usuario'],
     });
     if (!updatedMascota) {
       throw new Error(`Mascota with id ${id} not found after update.`);

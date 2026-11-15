@@ -88,13 +88,26 @@ jobs:
       # Instala las dependencias usando package-lock.json
       - name: Instalar dependencias
         run: npm ci
+      - name: ESLint
+        working-directory: ./vete-api
+        run: npx --no-install eslint src
+
 
 
       # Ejecuta todos los test del backend
       # Incluye los unit test y el integration test
-      - name: Ejecutar tests
-        run: npm test -- --runInBand
+      - name: Ejecutar tests con cobertura
+        run: npm test -- --runInBand --coverage
 
+
+      # Sube el reporte de cobertura de Jest a Codecov
+      - name: Subir cobertura a Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./vete-api/coverage/lcov.info
+          disable_search: true
+          fail_ci_if_error: true
 
       # Comprueba que el backend compile correctamente
       - name: Build del backend

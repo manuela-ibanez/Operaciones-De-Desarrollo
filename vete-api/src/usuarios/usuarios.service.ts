@@ -3,7 +3,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from './entities/usuario.entity';
-import { Mascota } from '../mascotas/entities/mascota.entity';  // ← IMPORTAR
+import { Mascota } from '../mascotas/entities/mascota.entity'; // ← IMPORTAR
 import { Repository } from 'typeorm';
 import { HttpException } from '@nestjs/common';
 
@@ -13,7 +13,7 @@ export class UsuariosService {
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
     @InjectRepository(Mascota)
-    private mascotasRepository: Repository<Mascota>
+    private mascotasRepository: Repository<Mascota>,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto) {
@@ -24,12 +24,12 @@ export class UsuariosService {
         email: createUsuarioDto.email,
         apellido: createUsuarioDto.apellido,
       });
-      
+
       const usuarioGuardado = await this.usuarioRepository.save(usuario);
 
       // Si vienen mascotas, crearlas
       if (createUsuarioDto.mascotas && createUsuarioDto.mascotas.length > 0) {
-        const mascotas = createUsuarioDto.mascotas.map((m: any) =>
+        const mascotas = createUsuarioDto.mascotas.map((m) =>
           this.mascotasRepository.create({
             nombre: m.nombre,
             clase: m.clase,
@@ -49,7 +49,10 @@ export class UsuariosService {
       });
     } catch (error) {
       console.error('Error al crear el usuario:', error);
-      throw new HttpException('No se pudo crear el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'No se pudo crear el usuario',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -60,7 +63,7 @@ export class UsuariosService {
   findOne(id: number) {
     return this.usuarioRepository.findOne({
       where: { id },
-      relations: ['mascotas'] 
+      relations: ['mascotas'],
     });
   }
 
@@ -68,7 +71,7 @@ export class UsuariosService {
     await this.usuarioRepository.update(id, updateUsuarioDto);
     const updatedUsuario = await this.usuarioRepository.findOne({
       where: { id },
-      relations: ['mascotas'] 
+      relations: ['mascotas'],
     });
     if (!updatedUsuario) {
       throw new Error(`Usuario with id ${id} not found after update.`);
