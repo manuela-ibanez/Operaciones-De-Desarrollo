@@ -274,4 +274,4 @@ jobs:
       - name: Deploy Frontend en Render
         env:
           RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
-        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL_FRONTEND"
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL_API"
