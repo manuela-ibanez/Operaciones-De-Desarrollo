@@ -88,10 +88,11 @@ jobs:
       # Instala las dependencias usando package-lock.json
       - name: Instalar dependencias
         run: npm ci
-      - name: ESLint
-        working-directory: ./vete-api
-        run: npx --no-install eslint src
 
+
+      # Analiza la calidad del codigo del backend
+      - name: ESLint Backend
+        run: npx --no-install eslint src
 
 
       # Ejecuta todos los test del backend
@@ -101,13 +102,16 @@ jobs:
 
 
       # Sube el reporte de cobertura de Jest a Codecov
-      - name: Subir cobertura a Codecov
+      - name: Subir cobertura del backend a Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./vete-api/coverage/lcov.info
+          flags: backend
           disable_search: true
           fail_ci_if_error: true
+          verbose: true
+
 
       # Comprueba que el backend compile correctamente
       - name: Build del backend
@@ -153,6 +157,11 @@ jobs:
         run: npm ci
 
 
+      # Analiza la calidad del codigo Angular
+      - name: ESLint Frontend
+        run: npx ng lint
+
+
       # Instala Chrome para poder ejecutar los test de Angular
       - name: Configurar Chrome
         id: chrome
@@ -161,12 +170,30 @@ jobs:
 
       # Ejecuta todos los test del frontend
       # Este lanzador de Angular permite iniciar Chrome en el runner de Actions
-      - name: Ejecutar tests
-        run: npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+      # Genera tambien el reporte de cobertura para Codecov
+      - name: Ejecutar tests con cobertura
+        run: npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
 
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
           CI: true
+
+
+      # Comprueba que se genero el archivo de cobertura
+      - name: Verificar informe LCOV
+        run: test -f coverage/vete-app/lcov.info
+
+
+      # Sube el reporte de cobertura de Angular a Codecov
+      - name: Subir cobertura del frontend a Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./vete-app/coverage/vete-app/lcov.info
+          flags: frontend
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
 
 
       # Comprueba que el frontend compile correctamente
@@ -251,6 +278,8 @@ jobs:
           docker tag postgres:latest ${{ secrets.DOCKERHUB_USERNAME }}/vete-postgres:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/vete-postgres:latest
 
+
+
   # Despliega imagen en Render
   deploy:
     name: Deploy en Render
@@ -264,12 +293,15 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+
       # Despliega el backend NestJS
       - name: Deploy Backend en Render
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
-    
+
+
+      # Despliega el frontend Angular
       - name: Deploy Frontend en Render
         env:
           RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
