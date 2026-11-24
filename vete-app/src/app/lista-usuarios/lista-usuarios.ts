@@ -1,52 +1,63 @@
-import { Component } from '@angular/core';
+
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Usuario } from '../interfaces/usuario';
 import { UsuariosService } from '../services/usuarios';
-import { OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-lista-usuarios',
-  standalone: true, //Se puede usar directamente en una ruta, sin declararlo en un módulo
+  standalone: true, // Se puede usar directamente en una ruta, sin declararlo en un módulo
   imports: [RouterLink, FormsModule, CommonModule],
   templateUrl: './lista-usuarios.html',
   styleUrl: './lista-usuarios.css',
 })
-export class ListaUsuarios implements OnInit { // Implementar OnInit para inicialización
-  usuarios: Usuario[] = []; //Lista de usuarios que le pasa el service desde el backend
+export class ListaUsuarios implements OnInit {
 
-  // Datos del usuario para lo formularios de crear y editar
-  nombre: string = ''; 
-  apellido: string = '';
-  email: string = '';
+  // Lista de usuarios que trae el servicio desde el backend
+  usuarios: Usuario[] = [];
 
-  // Datos de la mascota para el formulario de crear usuario con mascota
-  mascotaNombre: string = '';
-  mascotaClase: string = '';
+  // Datos del usuario para los formularios de crear y editar
+  nombre = '';
+  apellido = '';
+  email = '';
+
+  // Datos de la mascota para crear un usuario con mascota
+  mascotaNombre = '';
+  mascotaClase = '';
   mascotaPeso: number | undefined;
   mascotaEdad: number | undefined;
-  editarUsuarioId: any | undefined; //Control para saber que usuario esta en edición
 
-  constructor(private usuariosService: UsuariosService) {} // Inyectar el servicio de usuarios
+  // ID del usuario que se está editando
+  editarUsuarioId: number | null = null;
 
-  ngOnInit(): void { // Cargar datos iniciales desde el backend, a traves de ls services 
+  // Inyección del servicio de usuarios
+  private usuariosService = inject(UsuariosService);
+
+  // Cargar los usuarios al iniciar el componente
+  ngOnInit(): void {
     this.loadUsuarios();
   }
 
-  private loadUsuarios(): void { //Cuando el componente se inicie, llamar a loadUsuarios() para traer los usuarios del backend.
+  // Traer todos los usuarios del backend
+  private loadUsuarios(): void {
     this.usuariosService.getAll().subscribe(
       (data) => {
         this.usuarios = data;
       },
-      (error) => console.error('Error al cargar los usuarios:', error)
+      (error) => {
+        console.error('Error al cargar los usuarios:', error);
+      }
     );
   }
 
-  createUsuario(form: any): void { //Para formulario
-    // Crear el objeto con usuario y mascota
-    const nuevoUsuarioConMascota = { //Objeto que se envia al backend
-      nombre: form.value.nombre, //Datos actuales
+  // Crear un usuario con una mascota
+  createUsuario(form: NgForm): void {
+
+    // Objeto que se envía al backend
+    const nuevoUsuarioConMascota = {
+      nombre: form.value.nombre,
       apellido: form.value.apellido,
       email: form.value.email,
       mascotas: [
@@ -59,67 +70,90 @@ export class ListaUsuarios implements OnInit { // Implementar OnInit para inicia
       ]
     };
 
-    // Llamar al servicio para crear usuario con mascota
-    this.usuariosService.createUsuario(nuevoUsuarioConMascota).subscribe( //cuando el usuario aprieta el boton crear
-      (addedUsuario) => { //Exito
+    // Llamar al servicio para crear el usuario
+    this.usuariosService.createUsuario(nuevoUsuarioConMascota).subscribe(
+      (addedUsuario) => {
         console.log('Usuario con mascota añadido', addedUsuario);
         alert('✅ Usuario y mascota creados exitosamente');
-        
-        // Limpiar formulario
+
+        // Limpiar el formulario
         form.reset();
         this.loadUsuarios();
       },
-      (error) => { //Error
+      (error) => {
         console.error('Error al agregar el usuario:', error);
         alert('❌ Error al crear el usuario. Por favor, intenta nuevamente.');
       }
     );
   }
 
-  editUsuario (id:number): void{ //Abre y cierra el formulario
-    if (this.editarUsuarioId === id){
-      this.editarUsuarioId = null; //Si se vuelve a hacer click se cancela la edicion
+  // Abrir o cerrar el formulario de edición
+  editUsuario(id: number): void {
+
+    // Si el usuario ya está en edición, cancelar
+    if (this.editarUsuarioId === id) {
+      this.editarUsuarioId = null;
       return;
     }
+
+    // Activar la edición de este usuario
     this.editarUsuarioId = id;
     console.log('Usuario editado con id:', id);
   }
 
-  updateUsuario (form: any): void {
-    this.usuariosService.updateUsuario(form.value.id, { //Con el form.value obtiene los datos del usuario con el id
-      nombre: form.value.nombre, //Hace put al backend enviando los nuevos datos para actualizar
-      apellido:form.value.apellido,
-      email:form.value.email,
-    }).subscribe(
-      (updateUsuario) => {
-        const index = this.usuarios.findIndex(usuario => usuario.id === updateUsuario.id); //Busca en los usuarios el que tenga ese id y lo actualiza
-        if (index !== -1){
-          this.usuarios[index] = updateUsuario;
-        }
-        console.log ('Usuario actualizado:', updateUsuario);
-        alert('✅ Usuario actualizado exitosamente');
-        this.editarUsuarioId = null; //Desactiva el formulario de edición en la tabla
-      },
-    (error) => {
-      console.log ('Ocurrio un error al actualizar el usuario', error);
-      alert('❌ Error al actualizar el usuario')
-    }
-  );
-}
+  // Actualizar los datos de un usuario
+  updateUsuario(form: NgForm): void {
 
- //Eliminar usuario
-  deleteUsuario(id: number): void { //Se ejecuta al tocal el boton eliminar. Solo recibe el ID del usuario.
-    alert ('¿Estás seguro de eliminar este usuario?');
-      this.usuariosService.deleteUsuario(id).subscribe( //Llama al servicio para eliminar, delete(id) hace un delete al backend para eliminar
-        () => {
-          this.usuarios = this.usuarios.filter(usuario => usuario.id !== id); //Actualiza la lista de usuarios
-          alert('✅ Usuario eliminado exitosamente');
-          console.log(`Usuario con ID ${id} eliminado`);
-        },
-        (error) => {
-          console.error('Error al eliminar el usuario:', error);
-          alert('❌ Error al eliminar el usuario');
+    this.usuariosService.updateUsuario(form.value.id, {
+      nombre: form.value.nombre,
+      apellido: form.value.apellido,
+      email: form.value.email
+    }).subscribe(
+      (updatedUsuario) => {
+
+        // Buscar el usuario actualizado en la lista
+        const index = this.usuarios.findIndex(
+          usuario => usuario.id === updatedUsuario.id
+        );
+
+        // Reemplazar los datos anteriores por los nuevos
+        if (index !== -1) {
+          this.usuarios[index] = updatedUsuario;
         }
-      );
-    }
+
+        console.log('Usuario actualizado:', updatedUsuario);
+        alert('✅ Usuario actualizado exitosamente');
+
+        // Cerrar el formulario de edición
+        this.editarUsuarioId = null;
+      },
+      (error) => {
+        console.error('Ocurrió un error al actualizar el usuario:', error);
+        alert('❌ Error al actualizar el usuario');
+      }
+    );
   }
+
+  // Eliminar un usuario
+  deleteUsuario(id: number): void {
+
+    alert('¿Estás seguro de eliminar este usuario?');
+
+    this.usuariosService.deleteUsuario(id).subscribe(
+      () => {
+
+        // Quitar el usuario eliminado de la lista
+        this.usuarios = this.usuarios.filter(
+          usuario => usuario.id !== id
+        );
+
+        alert('✅ Usuario eliminado exitosamente');
+        console.log(`Usuario con ID ${id} eliminado`);
+      },
+      (error) => {
+        console.error('Error al eliminar el usuario:', error);
+        alert('❌ Error al eliminar el usuario');
+      }
+    );
+  }
+}

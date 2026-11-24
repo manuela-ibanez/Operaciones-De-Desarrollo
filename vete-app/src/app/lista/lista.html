@@ -1,3 +1,4 @@
+
 <div class="container py-4"> <!-- Contenedor principal -->
   <h2>Listado de Mascotas</h2>
 
@@ -25,7 +26,7 @@
           <td>{{ mascota.edad }} años</td>
           <td>
             {{ mascota.usuario?.nombre }}
-            {{ mascota.usuario?.apellido }} 
+            {{ mascota.usuario?.apellido }}
           </td>
           <td>
             <button class="btn btn-editar" (click)="editMascota(mascota.id!)"> <!-- Boton de editar -->
@@ -34,10 +35,10 @@
             <button class="btn btn-danger" (click)="deleteMascota(mascota.id!)"> <!-- Boton de eliminar -->
               Eliminar
             </button>
-            </td>
+          </td>
         </tr>
         <!--formulario editar mascotas-->
-            <tr *ngIf="mascota.id == editarMascotaId" class="mt-3 border border-secondary"> <!--el formulario aparece solo para la mascota seleccionada-->
+            <tr *ngIf="mascota.id === editarMascotaId" class="mt-3 border border-secondary"> <!--el formulario aparece solo para la mascota seleccionada-->
               <td colspan="6">
               <form (ngSubmit)="updateMascota(updateMascotaForm)" #updateMascotaForm="ngForm" class="p-3">
                 <input type="hidden" [(ngModel)]="mascota.id" name="id" />
@@ -116,7 +117,7 @@
     <div class="card-body">
       <form (ngSubmit)="createMascota(createMascotasForm)" #createMascotasForm="ngForm" class="p-3"> <!--el # le da un nombre al formulario para ver su estado-->
         <div class="col-md-6 mb-3"> <!-- Campo de nombre -->
-          <label for="nombre" class="form-label">Nombre *</label> 
+          <label for="nombre" class="form-label">Nombre *</label>
           <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="nombre" #nombreInput="ngModel"
               required
               minlength="2"
@@ -141,7 +142,7 @@
               <small *ngIf="claseInput.errors?.['minlength']">Mínimo 2 caracteres</small>
               <small *ngIf="claseInput.errors?.['maxlength']">Máximo 50 caracteres</small>
             </div>
-          </div> 
+          </div>
 
           <div class="col-md-6 mb-3">
             <label for="peso" class="form-label">Peso (kg) *</label> <!-- Campo de peso -->
@@ -191,3 +192,5 @@
         <button type="submit" class="btn btn-añadir" [disabled]="createMascotasForm.invalid">Añadir Mascota</button>
       </form> <!--disabled se activa si el formulario es invalido, y el formulario es invalido si cualquiera de los inputs lo es-->
   </div>
+  </div>
+</div>

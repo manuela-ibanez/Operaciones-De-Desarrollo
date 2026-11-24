@@ -1,39 +1,42 @@
-//El service se encarga de persistir los datos, trae los datos del backend.
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Usuario } from '../interfaces/usuario';
 import { environment } from '../../environments/environment';
+
+// Datos que utilizamos para crear o actualizar usuarios
+type DatosUsuario = Pick<Usuario, 'nombre' | 'apellido' | 'email'>;
+
 @Injectable({
   providedIn: 'root',
 })
 export class UsuariosService {
 
   private baseUrl = `${environment.apiUrl}/usuarios`;
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
-  // Traer todos los usuarios.
-  getAll(): Observable<Usuario[]> { //Cuando cambia el observable toma una acción
-    return this.http.get<Usuario[]>(this.baseUrl); //El metodo get devuelve un observable
+  // Traer todos los usuarios
+  getAll(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(this.baseUrl);
   }
 
-  // Traer un usuario por una ID.
-  getUsuarios(id: number): Observable<Usuario> { //Devuelve un observable
+  // Traer un usuario por su ID
+  getUsuarios(id: number): Observable<Usuario> {
     return this.http.get<Usuario>(`${this.baseUrl}/${id}`);
   }
 
-  // Crear un usuario.
-  createUsuario(usuario: any): Observable<Usuario> {
+  // Crear un usuario
+  createUsuario(usuario: DatosUsuario): Observable<Usuario> {
     return this.http.post<Usuario>(this.baseUrl, usuario);
   }
 
-  // Actualizar un usuario con su ID.
-  updateUsuario(id: number, usuario: any): Observable<Usuario> {
+  // Actualizar un usuario
+  updateUsuario(id: number, usuario: Partial<DatosUsuario>): Observable<Usuario> {
     return this.http.put<Usuario>(`${this.baseUrl}/${id}`, usuario);
   }
 
-  // eliminar un usuario.
-  deleteUsuario(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+  // Eliminar un usuario
+  deleteUsuario(id: number): Observable<{ mensaje: string }> {
+    return this.http.delete<{ mensaje: string }>(`${this.baseUrl}/${id}`);
   }
 }
