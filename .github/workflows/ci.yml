@@ -257,14 +257,21 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    # Espera a que DockerHub tenga las imagenes
+    # Espera a que Docker Hub tenga las imágenes
     needs: docker
 
     # Solo despliega cuando hay un push a main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-      - name: Ejecutar Deploy Hook
+      # Despliega el backend NestJS
+      - name: Deploy Backend en Render
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+      # Despliega el frontend Angular
+      - name: Deploy Frontend en Render
+        env:
+          RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
+        run: curl -fsS -X POST "$RENDER_FRONTEND_DEPLOY_HOOK_URL"
