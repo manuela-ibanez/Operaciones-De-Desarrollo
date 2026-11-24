@@ -7,12 +7,13 @@
     import { environment } from '../../environments/environment';
 
     //Agrupa los test relacionados con la integracion de ListaUsuarios
+    //Prueba la integración entre ListaUsuarios, UsuariosService y HttpClient
     describe('ListaUsuarios Integration Test', () => { 
     //Componente real que se va a probar
         let component: ListaUsuarios;
 
     //Permite controlar las peticiones HTTP realizadas durante el test
-        let httpTesting: HttpTestingController;
+        let httpTesting: HttpTestingController; //Herramienta de angular que permite controlar las peticiones HTTP durante el test
 
 
     //Se ejecuta antes de cada test
@@ -20,7 +21,7 @@
 
         //Se crea el entorno de testing usando el componente real
         //No se mockea ListaUsuarios ni UsuariosService
-        await TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({ //TestBed es una herramienta de angular que crea un entorno de prueba
 
         imports: [ ListaUsuarios ],
         providers: [
@@ -31,13 +32,13 @@
         ]
         }).compileComponents();
 
-        //Angular crea el componente real
-        const fixture = TestBed.createComponent(ListaUsuarios);
+        //Se crea el componente ListaUsuarios real usando el entorno de testing
+        const fixture = TestBed.createComponent(ListaUsuarios); //Fixture es un contenedor que permite acceder al componente
 
-        //Se obtiene la instancia real del componente
+        //Se obtiene la instancia real de ListaUsuarios, sin las demas herramientas de tetsing que tiene fixture
         component = fixture.componentInstance;
 
-        //Se obtiene el controlador de las peticiones HTTP del test
+        //Se obtiene el controlador de las peticiones HTTP del test creado en el modulo de testing
         httpTesting = TestBed.inject(HttpTestingController);
 
         });
@@ -70,10 +71,11 @@
         component.ngOnInit();
 
         //Se obtiene la peticion que UsuariosService hizo al endpoint de usuarios
+        //Verifica que la peticion haya sido a usuarios
         const request = httpTesting.expectOne(`${environment.apiUrl}/usuarios`);
 
         //Se simula la respuesta HTTP con los usuarios
-        request.flush(usuarios);
+        request.flush(usuarios); //Flush herramienta de angular que simula peticiones hhtp
 
         //Assert
         //Se comprueba que ListaUsuarios guardo correctamente

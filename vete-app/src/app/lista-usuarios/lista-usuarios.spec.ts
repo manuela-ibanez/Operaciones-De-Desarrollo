@@ -1,7 +1,9 @@
+
 import { UsuariosService } from '../services/usuarios'
 import { Usuario } from '../interfaces/usuario'
 import { ListaUsuarios } from './lista-usuarios';
 import { of } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
 
 describe('ListaUsuarios', () => { //Agrupa los test relacionados con ListaUsuarios
   //Componente real que se quiere probar
@@ -13,7 +15,17 @@ describe('ListaUsuarios', () => { //Agrupa los test relacionados con ListaUsuari
 
   beforeEach(() => {
     //Se crea el componente y se le pasa el service mockeado
-    component = new ListaUsuarios(mockUsuariosService);
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: UsuariosService,
+          useValue: mockUsuariosService
+        }
+      ]
+    });
+
+    component = TestBed.runInInjectionContext(() => new ListaUsuarios());
+
     //Se limpian las llamadas anteriores al mock
     mockUsuariosService.getAll.calls.reset();
   });
@@ -24,7 +36,6 @@ describe('ListaUsuarios', () => { //Agrupa los test relacionados con ListaUsuari
     //Arrange
     //Se define el id del usuario que se va a editar
     const usuarioId = 1;
-    component.editarUsuarioId = null;
 
     //Act
     component.editUsuario(usuarioId);
@@ -59,6 +70,7 @@ describe('ListaUsuarios', () => { //Agrupa los test relacionados con ListaUsuari
 
     //Act
     component.ngOnInit(); //Le dice a angular que ejecute ngOnInit
+
     //Assert
     //Lo que guardó el componente es component.usuarios
     expect(component.usuarios).toEqual(mockUsuarios);

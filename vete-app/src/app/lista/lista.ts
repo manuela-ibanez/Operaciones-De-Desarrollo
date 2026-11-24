@@ -1,9 +1,11 @@
+
 import { CommonModule, NgIf } from "@angular/common";
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { MascotasService } from '../services/mascotas';
 import { Mascota } from "../interfaces/mascota";
 import { UsuariosService } from "../services/usuarios";
+import { Usuario } from "../interfaces/usuario";
 
 @Component({
   selector: 'app-lista',
@@ -22,15 +24,14 @@ export class Lista implements OnInit {
   protected clase: string | undefined; //Para el formulario de crear mascotas a traves de ngModel
   protected peso: number | undefined;
   protected edad: number | undefined;
-  protected usuarios: any; //Almacena la lista de usuarios que vienen del backend
+  protected usuarios: Usuario[] = []; //Almacena la lista de usuarios que vienen del backend
   protected usuarioId: number | undefined; //Almacena el id del usuario seleccionado
-  protected editarMascotaId: any | undefined; //Para saber que mascota esta en edición
+  protected editarMascotaId: number | null = null; //Para saber que mascota esta en edición
 
 
-  constructor( // Inyectar el servicio de mascotas y usuarios
-    private mascotasService: MascotasService,
-    private usuariosService: UsuariosService
-  ) {}
+  // Inyectar el servicio de mascotas y usuarios
+  private mascotasService = inject(MascotasService);
+  private usuariosService = inject(UsuariosService);
 
   ngOnInit(): void { // Cargar datos iniciales cuando se inicializa el componente.
     this.loadMascotas();
@@ -59,8 +60,8 @@ export class Lista implements OnInit {
     );
   }
 
-  createMascota(form: any): void { //Se ejecuta al enviar un formulario.
-    const newMascota: any = { //Objeto que se envia al backend
+  createMascota(form: NgForm): void { //Se ejecuta al enviar un formulario.
+    const newMascota = { //Objeto que se envia al backend
       nombre: form.value.nombre, //Form.value contiene los valores actuales
       clase: form.value.clase,
       peso: form.value.peso,
@@ -97,7 +98,7 @@ export class Lista implements OnInit {
     console.log('Mascota editada con id:', id);
   }
 
-  updateMascota (form: any): void {
+  updateMascota (form: NgForm): void {
     this.mascotasService.updateMascota(form.value.id, { //Con el form.value obtiene los datos de la mascota con el id
       nombre: form.value.nombre, //Hace put al backend enviando los nuevos datos para actualizar
       clase:form.value.clase,

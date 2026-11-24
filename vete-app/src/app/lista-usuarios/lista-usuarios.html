@@ -38,7 +38,7 @@
             </button>
           </td>
         </tr>
-            <tr *ngIf="usuario.id == editarUsuarioId" class="mt-3 border border-secondary">
+            <tr *ngIf="usuario.id === editarUsuarioId" class="mt-3 border border-secondary">
               <td colspan="6">
               <form (ngSubmit)="updateUsuario(updateMascotaForm)" #updateMascotaForm="ngForm" class="p-3">
                 <input type="hidden" [(ngModel)]="usuario.id" name="id" />
