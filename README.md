@@ -1,2 +1,2 @@
 # Operaciones de desarrollo
-Primer Entrega
+Trabajo Practico Parte 1 y 2
